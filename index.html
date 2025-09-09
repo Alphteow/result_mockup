@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Games Schedule - Team Singapore</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #dc2626;
+            color: white;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .main-container {
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+
+        .filters {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .filter-group label {
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        input, select, button {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        input, select {
+            background-color: white;
+            color: #333;
+        }
+
+        .btn-go {
+            background-color: #000;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .btn-clear {
+            background-color: #000;
+            color: white;
+            cursor: pointer;
+            border: 2px solid white;
+        }
+
+        .table-container {
+            background-color: rgba(0, 0, 0, 0.8);
+            border-radius: 8px;
+            overflow: visible;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            overflow-y: visible;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background-color: #374151;
+            color: white;
+            padding: 15px 10px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+        }
+
+        td {
+            padding: 15px 10px;
+            border-bottom: 1px solid #4b5563;
+            vertical-align: top;
+            position: relative;
+            text-align: center;
+        }
+
+        tr:nth-child(even) {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .sport-tag {
+            color: #ef4444;
+            font-weight: bold;
+        }
+
+        .click-to-view {
+            position: relative;
+            cursor: pointer;
+            color: #60a5fa;
+            font-style: italic;
+            text-decoration: underline;
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .click-to-view:hover {
+            background-color: rgba(96, 165, 250, 0.1);
+            color: #93c5fd;
+        }
+
+        .team-dropdown {
+            position: fixed;
+            background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+            border: 2px solid #4b5563;
+            border-radius: 12px;
+            padding: 20px;
+            min-width: 400px;
+            max-width: 500px;
+            z-index: 9999;
+            display: none;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            max-height: 400px;
+            overflow-y: auto;
+            animation: dropdownFadeIn 0.2s ease-out;
+        }
+
+        @keyframes dropdownFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .team-dropdown.show {
+            display: block;
+        }
+
+        .team-dropdown::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            left: 20px;
+            width: 16px;
+            height: 16px;
+            background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+            border: 2px solid #4b5563;
+            border-bottom: none;
+            border-right: none;
+            transform: rotate(45deg);
+            border-radius: 2px;
+        }
+
+        .team-dropdown.dropup::before {
+            top: auto;
+            bottom: -8px;
+            transform: rotate(225deg);
+            border: 2px solid #4b5563;
+            border-top: none;
+            border-left: none;
+        }
+
+        .team-members {
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .team-members strong {
+            color: #fbbf24;
+            display: block;
+            margin-bottom: 15px;
+            font-size: 1rem;
+            border-bottom: 1px solid #374151;
+            padding-bottom: 8px;
+        }
+
+        .team-member-name {
+            display: inline-block;
+            margin: 4px 8px 8px 0;
+            color: #e5e7eb;
+            padding: 8px 12px;
+            background: linear-gradient(135deg, #374151 0%, #4b5563 100%);
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+        }
+
+        .team-member-name:hover {
+            background: linear-gradient(135deg, #4b5563 0%, #6b7280 100%);
+            border-color: #60a5fa;
+            transform: translateY(-1px);
+        }
+
+        .team-members-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 8px;
+        }
+
+        .dropdown-close {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background: none;
+            border: none;
+            color: #9ca3af;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .dropdown-close:hover {
+            color: #f87171;
+            background-color: rgba(248, 113, 113, 0.1);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 1.2rem;
+        }
+
+        .error {
+            text-align: center;
+            padding: 40px;
+            color: #fbbf24;
+            font-size: 1.1rem;
+        }
+
+        .result-text {
+            white-space: pre-line;
+            line-height: 1.4;
+        }
+
+        /* Mobile Card Layout */
+        .mobile-cards {
+            display: none;
+        }
+
+        .event-card {
+            background-color: rgba(255, 255, 255, 0.95);
+            color: #333;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-date {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .card-time {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .card-event {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .card-athlete {
+            font-size: 0.95rem;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .card-sport {
+            color: #dc2626;
+            font-weight: bold;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+        }
+
+        .card-venue {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+        }
+
+        .card-round {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+
+        .card-result {
+            color: #333;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        /* Custom scrollbar for dropdown */
+        .team-dropdown::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .team-dropdown::-webkit-scrollbar-track {
+            background: #374151;
+            border-radius: 3px;
+        }
+
+        .team-dropdown::-webkit-scrollbar-thumb {
+            background: #6b7280;
+            border-radius: 3px;
+        }
+
+        .team-dropdown::-webkit-scrollbar-thumb:hover {
+            background: #9ca3af;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .title {
+                font-size: 1.8rem;
+                text-align: center;
+                width: 100%;
+            }
+
+            .header {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+
+            .filters {
+                justify-content: center;
+                width: 100%;
+            }
+
+            .table-container {
+                display: none;
+            }
+
+            .mobile-cards {
+                display: block;
+            }
+
+            .team-dropdown {
+                min-width: 320px;
+                max-width: 90vw;
+                max-height: 70vh;
+                margin: 10px;
+            }
+
+            .team-members-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .title {
+                font-size: 1.5rem;
+            }
+
+            .filters {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .filter-group {
+                width: 100%;
+            }
+
+            input, select, button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="header">
+            <h1 class="title">GAMES SCHEDULE</h1>
+            <div class="filters">
+                <div class="filter-group">
+                    <label>Date</label>
+                    <input type="date" id="dateFilter">
+                </div>
+                <div class="filter-group">
+                    <label>Sports</label>
+                    <select id="sportsFilter">
+                        <option value="">All Sports</option>
+                    </select>
+                </div>
+                <button class="btn-go" onclick="applyFilters()">GO</button>
+                <button class="btn-clear" onclick="clearFilters()">Clear</button>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <div id="loading" class="loading">Loading schedule data...</div>
+            <div id="error" class="error" style="display: none;">Error loading data.</div>
+            <div class="table-wrapper">
+                <table id="scheduleTable" style="display: none;">
+                    <thead>
+                        <tr>
+                            <th>DATE & TIME</th>
+                            <th>SPORT</th>
+                            <th>EVENT</th>
+                            <th>ROUND</th>
+                            <th>ATHLETE NAME</th>
+                            <th>VENUE</th>
+                            <th>RESULT</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="mobile-cards" id="mobileCards">
+        </div>
+    </div>
+
+    <script>
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxrv0AXKxARvj6gk6_imj6GfM5ZHJiNcWxESmKBK3ygnUrPXBjLtupOeNA2XAEBYmbY/exec';
+        
+        let allData = [];
+        let filteredData = [];
+
+        async function loadData() {
+            try {
+                console.log('Loading data from:', APPS_SCRIPT_URL);
+                
+                const response = await fetch(APPS_SCRIPT_URL);
+                console.log('Response status:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                console.log('Received data:', data);
+                
+                if (!data || !Array.isArray(data)) {
+                    throw new Error('Invalid data format received');
+                }
+                
+                processSheetData(data);
+                populateSportsFilter();
+                renderTable();
+                renderMobileCards();
+                
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('scheduleTable').style.display = 'table';
+                
+            } catch (error) {
+                console.error('Error loading data:', error);
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('error').style.display = 'block';
+                document.getElementById('error').innerHTML = `
+                    Error: ${error.message}<br><br>
+                    Please check:<br>
+                    Check Script<br>
+                `;
+            }
+        }
+
+        function processSheetData(rawData) {
+            console.log('Processing sheet data:', rawData);
+            allData = [];
+            
+            for (let i = 1; i < rawData.length; i++) {
+                const row = rawData[i];
+                
+                if (!row || row.every(cell => !cell)) continue;
+                
+                const processedRow = {
+                    dateTime: row[0] || '',
+                    sport: row[1] || '',
+                    event: row[2] || '',
+                    round: row[3] || '',
+                    athleteName: row[4] || '',
+                    venue: row[5] || '',
+                    result: row[6] || '',
+                    originalIndex: allData.length
+                };
+                
+                allData.push(processedRow);
+            }
+            
+            console.log('Processed data:', allData);
+            filteredData = [...allData];
+        }
+
+        function hasMultipleAthletes(athleteName) {
+            if (!athleteName) return false;
+            
+            const name = athleteName.toString().trim();
+            const athletes = name.split('\n').filter(athlete => athlete.trim().length > 0);
+            
+            console.log(`Checking "${name}": found ${athletes.length} athletes`);
+            return athletes.length >= 2;
+        }
+
+        function parseMultipleAthletes(athleteName) {
+            if (!athleteName) return '';
+            
+            const name = athleteName.toString().trim();
+            const athletes = name.split('\n')
+                .map(athlete => athlete.trim())
+                .filter(athlete => athlete.length > 0)
+                .slice(0, 12);
+            
+            return `<div class="team-members-grid">` +
+                athletes.map(athlete => `<span class="team-member-name">${athlete}</span>`).join('') +
+                `</div>`;
+        }
+
+        function populateSportsFilter() {
+            const sports = [...new Set(allData.map(row => row.sport).filter(sport => sport))];
+            const select = document.getElementById('sportsFilter');
+            
+            select.innerHTML = '<option value="">All Sports</option>';
+            
+            sports.forEach(sport => {
+                const option = document.createElement('option');
+                option.value = sport;
+                option.textContent = sport;
+                select.appendChild(option);
+            });
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+
+            if (filteredData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 40px;">No data available</td></tr>';
+                return;
+            }
+
+            filteredData.forEach((row, index) => {
+                const tr = document.createElement('tr');
+                
+                let athleteNameCell = row.athleteName;
+                
+                if (hasMultipleAthletes(row.athleteName)) {
+                    const athletes = parseMultipleAthletes(row.athleteName);
+                    athleteNameCell = `
+                        <span class="click-to-view" onclick="toggleTeamDropdown(event, ${index})">
+                            Click to View Athletes
+                            <div class="team-dropdown" id="dropdown-${index}">
+                                <button class="dropdown-close" onclick="closeDropdown(${index})">&times;</button>
+                                <div class="team-members">
+                                    <strong>Athletes:</strong>
+                                    ${athletes}
+                                </div>
+                            </div>
+                        </span>
+                    `;
+                } else {
+                    athleteNameCell = row.athleteName.replace(/\n/g, '<br>');
+                }
+
+                const formattedResult = row.result.replace(/\n/g, '<br>');
+
+                tr.innerHTML = `
+                    <td>${row.dateTime}</td>
+                    <td><span class="sport-tag">${row.sport}</span></td>
+                    <td>${row.event}</td>
+                    <td>${row.round}</td>
+                    <td>${athleteNameCell}</td>
+                    <td>${row.venue}</td>
+                    <td><div class="result-text">${formattedResult}</div></td>
+                `;
+                
+                tbody.appendChild(tr);
+            });
+        }
+
+        function renderMobileCards() {
+            const container = document.getElementById('mobileCards');
+            container.innerHTML = '';
+
+            if (filteredData.length === 0) {
+                container.innerHTML = '<div style="text-align: center; padding: 40px; color: white;">No data available</div>';
+                return;
+            }
+
+            filteredData.forEach((row, index) => {
+                const card = document.createElement('div');
+                card.className = 'event-card';
+
+                // Parse date and time
+                const dateTimeParts = row.dateTime.split(' ');
+                const datePart = dateTimeParts[0] || '';
+                const timePart = dateTimeParts[1] || '';
+
+                let athleteNameContent = row.athleteName;
+                
+                if (hasMultipleAthletes(row.athleteName)) {
+                    const athletes = parseMultipleAthletes(row.athleteName);
+                    athleteNameContent = `
+                        <span class="click-to-view" onclick="toggleTeamDropdown(event, 'mobile-${index}')">
+                            Click to View Athletes
+                            <div class="team-dropdown" id="dropdown-mobile-${index}">
+                                <button class="dropdown-close" onclick="closeDropdown('mobile-${index}')">&times;</button>
+                                <div class="team-members">
+                                    <strong>Athletes:</strong>
+                                    ${athletes}
+                                </div>
+                            </div>
+                        </span>
+                    `;
+                } else {
+                    athleteNameContent = row.athleteName.replace(/\n/g, '<br>');
+                }
+
+                const formattedResult = row.result.replace(/\n/g, '<br>');
+
+                card.innerHTML = `
+                    <div class="card-date">${datePart}</div>
+                    <div class="card-time">${timePart}</div>
+                    <div class="card-event">${row.event}</div>
+                    <div class="card-athlete">${athleteNameContent}</div>
+                    <div class="card-sport">${row.sport}</div>
+                    <div class="card-venue">${row.venue}</div>
+                    <div class="card-round">${row.round}</div>
+                    <div class="card-result">${formattedResult}</div>
+                `;
+                
+                container.appendChild(card);
+            });
+        }
+
+        function toggleTeamDropdown(event, index) {
+            event.stopPropagation();
+            
+            const dropdown = document.getElementById(`dropdown-${index}`);
+            const isVisible = dropdown.classList.contains('show');
+            
+            // Hide all dropdowns
+            document.querySelectorAll('.team-dropdown').forEach(d => {
+                d.classList.remove('show', 'dropup');
+                d.style.top = '';
+                d.style.left = '';
+            });
+            
+            if (!isVisible) {
+                // Position the dropdown
+                positionDropdown(event.target, dropdown);
+                dropdown.classList.add('show');
+            }
+        }
+
+        function positionDropdown(trigger, dropdown) {
+            const triggerRect = trigger.getBoundingClientRect();
+            const viewportHeight = window.innerHeight;
+            const viewportWidth = window.innerWidth;
+            
+            // Calculate available space below and above
+            const spaceBelow = viewportHeight - triggerRect.bottom;
+            const spaceAbove = triggerRect.top;
+            
+            // Determine if we should show dropdown above or below
+            const showAbove = spaceBelow < 300 && spaceAbove > spaceBelow;
+            
+            let top, left;
+            
+            if (showAbove) {
+                top = triggerRect.top - 20; // Position above trigger
+                dropdown.classList.add('dropup');
+            } else {
+                top = triggerRect.bottom + 10; // Position below trigger
+            }
+            
+            // Center horizontally on trigger, but keep within viewport
+            left = triggerRect.left + (triggerRect.width / 2) - 200; // 200 is half of min-width
+            
+            // Ensure dropdown stays within viewport horizontally
+            if (left < 10) left = 10;
+            if (left + 400 > viewportWidth) left = viewportWidth - 410;
+            
+            // Ensure dropdown stays within viewport vertically
+            if (showAbove && top < 10) {
+                top = 10;
+                dropdown.classList.remove('dropup');
+            }
+            if (!showAbove && top + 400 > viewportHeight) {
+                top = viewportHeight - 410;
+            }
+            
+            dropdown.style.top = `${top}px`;
+            dropdown.style.left = `${left}px`;
+        }
+
+        function closeDropdown(index) {
+            const dropdown = document.getElementById(`dropdown-${index}`);
+            dropdown.classList.remove('show', 'dropup');
+            dropdown.style.top = '';
+            dropdown.style.left = '';
+        }
+
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', function(event) {
+            if (!event.target.closest('.click-to-view') && !event.target.closest('.team-dropdown')) {
+                document.querySelectorAll('.team-dropdown').forEach(d => {
+                    d.classList.remove('show', 'dropup');
+                    d.style.top = '';
+                    d.style.left = '';
+                });
+            }
+        });
+
+        // Close dropdowns on escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                document.querySelectorAll('.team-dropdown').forEach(d => {
+                    d.classList.remove('show', 'dropup');
+                    d.style.top = '';
+                    d.style.left = '';
+                });
+            }
+        });
+
+        function applyFilters() {
+            const dateFilter = document.getElementById('dateFilter').value;
+            const sportsFilter = document.getElementById('sportsFilter').value;
+
+            filteredData = allData.filter(row => {
+                let matchesDate = true;
+                let matchesSport = true;
+
+                if (dateFilter) {
+                    const filterDate = new Date(dateFilter);
+                    const day = filterDate.getDate().toString().padStart(2, '0');
+                    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
+                                      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                    const month = monthNames[filterDate.getMonth()];
+                    const formattedDate1 = `${day} ${month}`;
+                    const formattedDate2 = `${filterDate.getDate()} ${month}`;
+                    
+                    matchesDate = row.dateTime.includes(formattedDate1) || row.dateTime.includes(formattedDate2);
+                }
+
+                if (sportsFilter) {
+                    matchesSport = row.sport === sportsFilter;
+                }
+
+                return matchesDate && matchesSport;
+            });
+
+            renderTable();
+            renderMobileCards();
+        }
+
+        function clearFilters() {
+            document.getElementById('dateFilter').value = '';
+            document.getElementById('sportsFilter').value = '';
+            filteredData = [...allData];
+            renderTable();
+            renderMobileCards();
+        }
+
+        document.addEventListener('DOMContentLoaded', loadData);
+    </script>
+</body>
+</html>
